@@ -1,0 +1,5 @@
+- Phase 2 Nakconel Business complete locally under artifacts/nakconel: schema models, business/service.ts, API routes, BusinessView, BankApp Biz tab, apiRecordCollection, sharp UI [2026-10-24]
+- GitHub repo nakconelcompany-ai/nakconel-bank-2: schema fixed with Phase 2 models; BusinessView.tsx still needed on remote; most API routes already on remote [2026-10-24]
+- Live site only updates after GitHub push; local UX (bank picker, OPay signup, invoice review) committed as 8f87766; BusinessView + api + banks + identity already on main; BankApp.tsx still needs remote push for UI to change [2026-10-24]
+- SignupFlow: email OTP (demo code in toast), phone 0XXXXXXXXXX as account number, auto face scan with speechSynthesis voice prompts [2026-10-24]
+- Phase 3 International: corridors Africa/UK/US/GCC/Europe, FX quotes, InternationalTransfer model, InternationalView, World nav tab, API /international/quote + transfers [2026-10-24]

@@ -1,0 +1,52 @@
+Nakconel Bank Implementation
+
+KYC/AML, sanctions screening, transaction monitoring, fraud detection, FX controls, consumer protection and data security must be part of the architecture
+
+PHASE 1 — Nakconel Wallet
+Start with:
+Account
+KYC
+Wallet
+Naira balance
+Send/receive
+Transaction history
+Virtual card/payment functionality where permitted
+
+PHASE 2 — Nakconel Business
+Add:
+Business accounts
+Invoices
+Payment links
+Collections
+Expense management
+Team payments
+Business analytics
+
+PHASE 3 — International
+Then:
+Nigeria → Africa
+Nigeria → UK
+Nigeria → US
+Nigeria → GCC
+Nigeria → Europe and other countries
+with destination-specific regulatory and settlement arrangements.
+The CBN itself identifies international money transfer as a regulated payment activity and has guidelines covering inbound/outbound international money transfers. 
+
+PHASE 4 — Nakconel Gift
+Add:
+Gift cards
+Digital gifting
+Merchant rewards
+Business incentives
+
+PHASE 5 — Nakconel AI
+Then put the intelligence layer across everything:
+AI Financial Assistant
+AI fraud detection
+AI transaction monitoring
+AI business insights
+AI cash-flow forecasting
+AI FX/payment recommendations
+AI customer support
+
+Also add Unit test, and integration for testing the website

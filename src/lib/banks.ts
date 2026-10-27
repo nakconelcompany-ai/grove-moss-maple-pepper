@@ -1,0 +1,58 @@
+export type Bank = { id: string; name: string; logo: string; code?: string };
+
+/** Commercial banks and wallets, with Paystack/NIP codes where they are confirmed. */
+export const BANKS: Bank[] = [
+  ["access-bank", "Access Bank", "044"],
+  ["gtbank", "GTBank", "058"],
+  ["zenith-bank", "Zenith Bank", "057"],
+  ["uba", "UBA", "033"],
+  ["first-bank", "First Bank", "011"],
+  ["fidelity-bank", "Fidelity Bank", "070"],
+  ["fcmb", "FCMB", "214"],
+  ["union-bank", "Union Bank", "032"],
+  ["sterling-bank", "Sterling Bank", "232"],
+  ["wema-bank", "Wema Bank", "035"],
+  ["polaris-bank", "Polaris Bank", "076"],
+  ["stanbic-ibtc", "Stanbic IBTC", "221"],
+  ["standard-chartered", "Standard Chartered", "068"],
+  ["ecobank", "Ecobank", "050"],
+  ["keystone-bank", "Keystone Bank", "082"],
+  ["unity-bank", "Unity Bank", "215"],
+  ["providus-bank", "Providus Bank", "101"],
+  ["jaiz-bank", "Jaiz Bank", "301"],
+  ["lotus-bank", "Lotus Bank", "303"],
+  ["suntrust-bank", "SunTrust Bank", "100"],
+  ["titan-trust", "Titan Trust", "102"],
+  ["globus-bank", "Globus Bank", "00103"],
+  ["parallex-bank", "Parallex Bank", "104"],
+  ["premiumtrust", "PremiumTrust", "105"],
+  ["signature-bank", "Signature Bank"],
+  ["optimus-bank", "Optimus Bank"],
+  ["alternative-bank", "Alternative Bank"],
+  ["citibank", "Citibank"],
+  ["taj-bank", "TAJ Bank", "302"],
+  ["nova-bank", "NOVA Bank"],
+  ["summit-bank", "Summit Bank"],
+  ["alpha-morgan", "Alpha Morgan"],
+  ["tatum-bank", "Tatum Bank"],
+  ["kuda", "Kuda", "50211"],
+  ["opay", "OPay", "999992"],
+  ["palmpay", "PalmPay", "999991"],
+  ["moniepoint", "Moniepoint", "50515"],
+  ["carbon", "Carbon"],
+  ["paga", "Paga"],
+  ["9psb", "9PSB"],
+  ["mtn-momo", "MTN MoMo"],
+  ["smartcash", "Smartcash"],
+  ["hopepsb", "HopePSB"],
+  ["vfd", "VFD", "566"],
+].map(([id, name, code]) => ({
+  id,
+  name,
+  logo: `/banks/${id}.png`,
+  code,
+}));
+
+export function findBank(id: string) {
+  return BANKS.find((bank) => bank.id === id) ?? null;
+}

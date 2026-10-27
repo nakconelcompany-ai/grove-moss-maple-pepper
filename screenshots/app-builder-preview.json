@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Nakconel",
+      "hasCanvas": false,
+      "bodyTextLen": 55,
+      "bodyTextHash": "659f3a56012998575e07e684362fff28a75181b6dd4b023cc3d1cb4971fca197",
+      "bodyTextPrefix": "NAKCONEL BANK Banking for today, building for tomorrow.",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Nakconel",
+      "hasCanvas": false,
+      "bodyTextLen": 55,
+      "bodyTextHash": "659f3a56012998575e07e684362fff28a75181b6dd4b023cc3d1cb4971fca197",
+      "bodyTextPrefix": "NAKCONEL BANK Banking for today, building for tomorrow.",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

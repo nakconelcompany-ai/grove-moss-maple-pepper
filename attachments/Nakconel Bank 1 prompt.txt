@@ -1,0 +1,709 @@
+SCALABILITY AND PRODUCTION ARCHITECTURE
+
+Design Nakconel so the architecture can evolve to support millions of users, high transaction volume, multiple countries, multiple currencies and multiple financial partners.
+
+The MVP can run as a modular monolith initially, but the codebase must have clear domain boundaries so components can later be extracted into independent services without rewriting the entire application.
+
+Do NOT build the whole product as tightly coupled Next.js API routes.
+
+Use Next.js mainly for the web application and presentation layer.
+
+Design the backend as independent business modules with clear interfaces.
+
+CORE DOMAINS
+
+Separate the architecture into domains such as:
+
+Identity
+Authentication
+Users
+Accounts
+Ledger
+Balances
+Transactions
+Transfers
+Payments
+FX
+Beneficiaries
+Compliance
+KYC
+AML
+Fraud
+Notifications
+Business Accounts
+Invoices
+AI Insights
+Audit Logs
+Reporting
+
+Each domain should have its own:
+service layer
+repository/data-access layer
+validation
+types
+business rules
+interfaces
+
+Avoid direct database access from UI components.
+
+
+MODULAR MONOLITH FIRST
+
+For the first version, use a modular monolith.
+
+Do not prematurely create dozens of microservices.
+
+However, build boundaries so services such as:
+
+Ledger Service
+Transfer Service
+FX Service
+Compliance Service
+Notification Service
+AI Service
+
+can later be extracted into separate services.
+
+Business logic should not depend directly on Next.js.
+
+
+DATABASE SCALABILITY
+
+Use PostgreSQL as the transactional database.
+
+Design indexes carefully for:
+user_id
+account_id
+transaction_id
+transfer_id
+status
+created_at
+currency
+external_reference
+
+Use UUIDs for public/internal entity IDs where appropriate.
+
+Never rely on sequential IDs exposed to users.
+
+Use proper foreign keys and constraints.
+
+Avoid unbounded database queries.
+
+Every transaction list endpoint must support:
+cursor-based pagination
+filtering
+sorting
+limits
+
+Do NOT use OFFSET pagination for very large transaction datasets unless necessary.
+
+Plan for future:
+read replicas
+connection pooling
+database partitioning
+archiving
+horizontal read scaling
+
+Large ledger tables should be designed so they can eventually be partitioned by time or account/hash without redesigning the entire product.
+
+
+FINANCIAL LEDGER
+
+The ledger is the most critical system.
+
+Use immutable double-entry accounting.
+
+Never update or delete historical ledger entries.
+
+Corrections must happen through reversing or compensating entries.
+
+Each financial transaction should have:
+
+transaction ID
+journal ID
+debit account
+credit account
+amount
+currency
+timestamp
+reference
+status
+metadata
+
+Financial operations must be atomic.
+
+Use PostgreSQL transactions to guarantee consistency.
+
+Never calculate the authoritative balance by trusting a frontend value.
+
+Maintain ledger integrity.
+
+Create reconciliation capabilities.
+
+Every payment-provider transaction should have both:
+
+internal Nakconel reference
+external provider reference
+
+Design for idempotency.
+
+
+IDEMPOTENCY
+
+Every money-moving API must support idempotency keys.
+
+Example:
+
+POST /transfers
+
+must accept:
+
+Idempotency-Key
+
+If the request is repeated because of:
+network retry
+mobile retry
+provider timeout
+webhook retry
+
+the system must NOT create duplicate transfers.
+
+Store idempotency records safely.
+
+
+CONCURRENCY
+
+Design for many users performing transactions simultaneously.
+
+Use database transactions and locking strategies where needed.
+
+Prevent:
+double spending
+duplicate withdrawals
+duplicate transfers
+race conditions
+
+Do not use application memory as the source of truth for financial state.
+
+
+EVENT-DRIVEN ARCHITECTURE
+
+Create an internal event system.
+
+Examples:
+
+UserRegistered
+KYCCompleted
+TransferCreated
+TransferProcessing
+TransferCompleted
+TransferFailed
+PaymentReceived
+LedgerEntryCreated
+InvoicePaid
+
+For MVP development, events can initially be handled internally.
+
+However, define event contracts so the architecture can later move to infrastructure such as:
+
+Kafka
+AWS SQS
+Google Pub/Sub
+RabbitMQ
+
+Do not tightly couple asynchronous actions to the main transaction request.
+
+Example:
+
+A transfer completing should emit an event.
+
+Then separate workers can handle:
+notifications
+analytics
+AI insights
+webhooks
+reporting
+
+This prevents slow secondary operations from slowing down money movement.
+
+
+BACKGROUND JOBS
+
+Create a worker/job architecture for:
+
+provider reconciliation
+notifications
+email
+webhooks
+AI insights
+FX rate refresh
+fraud checks
+report generation
+scheduled transfers
+transaction settlement checks
+
+Never run heavy jobs inside customer-facing HTTP requests.
+
+
+CACHE
+
+Design caching for high-read information such as:
+
+exchange rates
+country configuration
+currency metadata
+feature flags
+public configuration
+
+Prepare the architecture for Redis.
+
+Do NOT cache authoritative account balances in a way that can create incorrect financial information.
+
+If balance caching is introduced later, the ledger/database remains the source of truth.
+
+
+API ARCHITECTURE
+
+Design APIs as versioned endpoints.
+
+Example:
+
+/api/v1/accounts
+/api/v1/transfers
+/api/v1/transactions
+/api/v1/fx/quote
+
+Use consistent:
+response formats
+error formats
+authentication
+authorization
+pagination
+request IDs
+
+Generate a unique request/correlation ID for important operations.
+
+This ID should follow requests through logs and services.
+
+
+RATE LIMITING
+
+Prepare endpoints for distributed rate limiting.
+
+Different limits should eventually apply to:
+
+Login
+OTP
+Password reset
+FX quotes
+Transfers
+Beneficiary creation
+API access
+
+The architecture should be compatible with Redis-based distributed rate limiting.
+
+
+PAYMENT PROVIDERS
+
+Use a provider abstraction.
+
+Never build business logic directly around a single payment company.
+
+Create interfaces such as:
+
+PaymentProvider
+TransferProvider
+BankAccountProvider
+CardProvider
+FXProvider
+KYCProvider
+
+Example implementations:
+
+MockTransferProvider
+ProviderATransferAdapter
+ProviderBTransferAdapter
+
+Nakconel should eventually be able to route transactions between providers.
+
+Design a future Payment Orchestration layer capable of choosing providers according to:
+
+country
+currency
+cost
+availability
+success rate
+speed
+transaction limits
+compliance rules
+
+One provider failing should not require redesigning Nakconel.
+
+
+FX SYSTEM
+
+Do not hardcode exchange rates.
+
+Build:
+
+FXQuoteService
+ExchangeRateRepository
+FXProvider interface
+
+Every quote should have:
+
+quote_id
+source_currency
+destination_currency
+rate
+fees
+amount_in
+amount_out
+expires_at
+
+Transfers should reference the quote used at confirmation.
+
+A quote should expire after a configured period.
+
+
+MULTI-REGION READINESS
+
+Do not hardcode Nigeria-specific assumptions throughout the application.
+
+Create configuration entities for:
+
+countries
+currencies
+payment corridors
+transaction limits
+fees
+verification requirements
+supported providers
+
+Examples:
+
+NG -> US
+NG -> UK
+NG -> KW
+
+The architecture should allow corridors to be enabled or disabled without redeploying the entire application.
+
+
+FEATURE FLAGS
+
+Implement a feature flag system.
+
+Examples:
+
+international_transfers_enabled
+business_accounts_enabled
+ai_insights_enabled
+gift_cards_enabled
+country_kw_enabled
+
+This allows Nakconel to roll out features safely to specific:
+users
+countries
+businesses
+percentages of users
+
+
+SECURITY AT SCALE
+
+Prepare for:
+
+short-lived access tokens
+refresh tokens
+device/session management
+MFA
+OTP
+suspicious login detection
+account lockouts
+RBAC
+fine-grained authorization
+
+Roles may include:
+
+customer
+business_owner
+business_admin
+support_agent
+compliance_officer
+finance_operator
+super_admin
+
+Never allow admin permissions to be controlled from the client.
+
+
+AUDIT TRAIL
+
+Every sensitive operation should create an immutable audit event.
+
+Examples:
+
+login
+password reset
+profile change
+KYC status change
+beneficiary creation
+transfer creation
+transfer cancellation
+admin action
+manual transaction review
+
+Record:
+
+actor
+action
+resource
+timestamp
+request ID
+IP/device metadata where appropriate
+
+Never put passwords, secrets or sensitive authentication tokens in audit logs.
+
+
+OBSERVABILITY
+
+Prepare production-grade observability.
+
+Use structured JSON logs.
+
+Include:
+
+request_id
+user_id where safe
+transaction_id
+transfer_id
+provider
+duration
+status
+
+Architecture should later support:
+
+OpenTelemetry
+Sentry
+Prometheus
+Grafana
+centralized logging
+
+Create health endpoints such as:
+
+/health
+/ready
+
+Do not expose sensitive infrastructure information through these endpoints.
+
+
+FAULT TOLERANCE
+
+External financial providers will fail.
+
+Design for:
+
+timeouts
+retries with exponential backoff
+circuit breakers
+provider downtime
+duplicate webhooks
+out-of-order webhooks
+delayed settlements
+
+Never assume a provider request returning a timeout means the transaction failed.
+
+Use states such as:
+
+CREATED
+PENDING
+PROCESSING
+COMPLETED
+FAILED
+REVERSED
+REQUIRES_REVIEW
+
+Financial status changes must follow controlled state transitions.
+
+
+WEBHOOKS
+
+Build a secure webhook architecture.
+
+Provider webhooks must:
+
+verify signatures
+check timestamps
+prevent replay attacks
+support idempotency
+store received events
+process asynchronously
+
+Never trust webhook payloads without verification.
+
+
+AI ARCHITECTURE
+
+Keep Nakconel AI separate from the transactional financial core.
+
+AI must never directly modify balances or execute transfers without deterministic backend authorization.
+
+AI can:
+
+analyze
+recommend
+explain
+forecast
+categorize
+detect patterns
+
+Any financial action suggested by AI must pass through the normal secure transaction system.
+
+Structure AI providers behind an interface so Nakconel is not locked to one AI company.
+
+
+DATA PRIVACY
+
+Design for data minimization.
+
+Separate personally identifiable information from general transaction/application data where practical.
+
+Prepare the architecture for:
+
+encryption at rest
+encryption in transit
+data retention policies
+account deletion workflows
+regulatory data retention
+privacy requests
+
+Never expose sensitive user information in analytics events.
+
+
+FILE STORAGE
+
+Do not store identity documents directly in the main database.
+
+Use secure object storage with:
+private buckets
+signed URLs
+restricted permissions
+
+Prepare this for KYC documents and business documents.
+
+
+PERFORMANCE TARGETS
+
+Design normal read endpoints to eventually support low-latency responses.
+
+Avoid N+1 database queries.
+
+Use efficient joins and indexes.
+
+Use server-side pagination.
+
+Use asynchronous processing for expensive operations.
+
+Do not load entire transaction histories into memory.
+
+
+DEPLOYMENT ARCHITECTURE
+
+Keep the application container-ready.
+
+Provide Docker support.
+
+Use environment-based configuration.
+
+Prepare for:
+
+development
+staging
+production
+
+The architecture should eventually work with:
+
+AWS
+Google Cloud
+Azure
+or another major cloud provider
+
+Do not tightly couple business logic to a specific cloud service.
+
+
+CI/CD
+
+Prepare:
+
+linting
+type checking
+unit tests
+integration tests
+database migration checks
+build validation
+
+before deployment.
+
+Create separate environment configurations.
+
+Never deploy automatically to production from arbitrary branches.
+
+
+TESTING
+
+Create tests for critical financial logic.
+
+High-priority tests:
+
+double-entry ledger balancing
+FX calculations
+fees
+idempotency
+transfer state transitions
+duplicate webhook prevention
+authorization
+account ownership
+insufficient balance
+concurrent transaction protection
+
+Ledger tests must verify:
+
+Total Debits = Total Credits
+
+
+DISASTER RECOVERY
+
+Design with backups and recovery in mind.
+
+Database migrations must be reversible where practical.
+
+Never make destructive schema changes without a migration strategy.
+
+Financial records must never disappear because of deployment errors.
+
+
+MILLIONS OF USERS PRINCIPLE
+
+Assume that Nakconel may eventually have:
+
+10,000,000+ users
+millions of accounts
+hundreds of millions of ledger entries
+multiple countries
+multiple currencies
+multiple payment partners
+
+Do not make architectural choices that make this impossible.
+
+However:
+
+Do NOT prematurely build expensive distributed infrastructure for an MVP.
+
+Use this principle:
+
+"Build simple now, but create boundaries that allow scale later."
+
+The first production architecture should be a well-designed modular monolith with PostgreSQL, Redis-ready caching, background workers, immutable ledger architecture and provider abstractions.
+
+Only split into microservices when actual scale, team structure or reliability requirements justify it.
+
+
+Also add Unit test, and integration for testing the website
