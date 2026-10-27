@@ -1,16 +1,18 @@
-# Nakconel Bank — workspace sync
+# Nakconel Bank — synced from nakconel-bank-2
 
-This folder mirrors the **Nakconel Bank** Next.js app.
+This folder mirrors the production bank app.
 
 | Repo | Role |
 |------|------|
-| [nakconel-bank-2](https://github.com/nakconelcompany-ai/nakconel-bank-2) | **Deploy target** (Vercel production) |
-| [grove-moss-maple-pepper](https://github.com/nakconelcompany-ai/grove-moss-maple-pepper) | Grok project workspace (this repo) |
+| **nakconel-bank-2** | Deploy target (Vercel) |
+| **grove-moss-maple-pepper** / `artifacts/nakconel` | Workspace copy of the bank |
 
-## Source of truth for production
+## Status
+Synced from `nakconel-bank-2` main (schema, package, app shell, lib, domains partial, health API).
 
-Always deploy from **nakconel-bank-2** `main`.
+Large UI components (BankApp, BusinessView, SignupFlow, InternationalView) and remaining API routes should be taken from:
+https://github.com/nakconelcompany-ai/nakconel-bank-2
 
-Last aligned with bank-2 around commit `b5b7b95` (BankApp props + IconWorld + schema matching Neon).
+**Never commit real DATABASE_URL or ENCRYPTION_KEY.**
 
-Do **not** put real `DATABASE_URL` or `ENCRYPTION_KEY` in git — use Vercel env / local `.env` only.
+Deploy only from **nakconel-bank-2**.
